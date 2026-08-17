@@ -1,0 +1,40 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Ortam degiskenleri - Firebase bilgileri asla repoya girmemeli
+.env
+.env.*
+!.env.example
+
+# Firebase CLI
+.firebase
+firebase-debug.log
+firestore-debug.log
+
+# Claude Code yerel araclari.
+# Icindeki ui-ux-pro-max ucuncu parti bir skill (kendi veri tabaniyla ~1.9 MB)
+# ve lisans dosyasi tasimiyor — baskasinin isini bu depo uzerinden yeniden
+# dagitmiyoruz. Projenin calismasi icin gerekli degil.
+.claude/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

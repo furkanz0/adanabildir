@@ -1,0 +1,3630 @@
+/* ===============================================================
+   ŞEHRİM — Tasarım Sistemi
+   Belediye/kamu hizmeti kimliği: resmî ama modern, güven veren, sıcak.
+   =============================================================== */
+
+:root {
+  /* --- renk --- */
+  --color-ink: #16231f;
+  --color-primary: #1b4b43;
+  --color-accent: #f2a93b;
+  --color-background: #f4f6f5;
+  --color-surface: #ffffff;
+  --color-border: #dde3e0;
+  /* Form denetimlerinin sınırı için ayrı, koyu ton. WCAG 1.4.11 arayüz
+     bileşenlerinin sınırında 3:1 istiyor; --color-border (1.30:1) ayraç
+     çizgileri için yeterli ama bir input'un nerede başladığını göstermeye
+     yetmiyor. */
+  --color-border-strong: #767f7c;
+
+  /* Trafik lambası: kırmızı / sarı / yeşil.
+     Kaynak tanım src/constants.js içindeki STATUSES — buradaki değerler
+     onunla aynı kalmalı. */
+  --color-status-bekliyor: #d64545;
+  --color-status-inceleniyor: #ebb01a;
+  --color-status-cozuldu: #2f9e62;
+  /* Yeşilin AÇIK ZEMİNDE yazı olarak kullanılan tonu. #2f9e62 beyaz üzerinde
+     3.34:1 veriyor — dolgu rengi olarak sorun değil ama küçük yazı için
+     WCAG'in istediği 4.5:1'in altında. Bu ton 5.24:1.
+     Aynı değer src/constants.js içindeki STATUSES.cozuldu.text ile eşleşir. */
+  --color-status-cozuldu-text: #1f7a49;
+
+  /* Görüntü işleme çıktısı (hasar yoğunluğu çerçevesi). Bilinçli olarak üç
+     durum renginin DIŞINDA bir ton: bu çerçeve bildirimin durumu hakkında
+     hiçbir şey söylemiyor, bir ölçüm alanını işaretliyor. Kırmızı/sarı/yeşil
+     kullansaydık durum bildirdiğini sanmak çok kolay olurdu. */
+  --color-analysis: #3b7ddb;
+  /* Aynı mavinin yazı zemini olarak kullanılan koyu tonu. Beyaz yazı
+     #3b7ddb üzerinde 4.08:1 veriyor — çerçeve kenarlığı için yeterli
+     (metin olmayan öge, 3:1) ama etiketteki yazı için değil. Bu ton 4.97:1. */
+  --color-analysis-strong: #356fc4;
+
+  /* türetilmiş tonlar */
+  --color-primary-dark: #123a33;
+  --color-primary-soft: #e7efec;
+  --color-accent-dark: #d8901f;
+  --color-accent-soft: #fdf3e3;
+  /* Amber'in koyu zeminde YAZI olarak kullanilan tonu. Marka amberi
+     (#f2a93b) navbar zemininde 3.98:1 veriyor — dolu bir buton uzerinde
+     sorun degil ama yazi icin WCAG 1.4.3'un istedigi 4.5:1'in altinda.
+     Bu ton 5.06:1. Dolu yuzeylerde marka amberi kullanilmaya devam ediyor. */
+  --color-accent-on-dark: #ffc46b;
+  --color-surface-sunken: #eef2f0;
+  --color-muted: #5c6b66;
+  --color-danger: #b3392c;
+  --color-danger-soft: #fceeeb;
+
+  /* --- tipografi --- */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+
+  --text-h1: 2.5rem;
+  --text-h2: 1.75rem;
+  --text-h3: 1.25rem;
+  --text-body: 1rem;
+  --text-sm: 0.9rem;
+  --text-caption: 0.85rem;
+  --text-xs: 0.75rem;
+
+  /* --- boşluk (4px tabanlı) --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* --- yarıçap --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* --- gölge --- */
+  --shadow-sm: 0 1px 2px rgba(22, 35, 31, 0.07);
+  --shadow-md: 0 4px 14px rgba(22, 35, 31, 0.09);
+  --shadow-lg: 0 14px 32px rgba(22, 35, 31, 0.16);
+
+  /* --- hareket --- */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 150ms;
+  --dur-mid: 250ms;
+  --dur-slow: 420ms;
+
+  color-scheme: light;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background-color: var(--color-background);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  /* Çapa bağlantıları ("İçeriğe geç") sıçramasın.
+     prefers-reduced-motion bloğu bunu auto'ya çeviriyor. */
+  scroll-behavior: smooth;
+}
+
+/* Haritayı parmakla kaydırırken sayfa yenilenmesi tetiklenmesin */
+body {
+  overscroll-behavior: contain;
+}
+
+/* Bazı mobil tarayıcılarda dokunma ile tıklama arasındaki 300 ms gecikmeyi
+   kaldırır — arayüz gözle görülür biçimde daha tepkili hissettirir. */
+button,
+a,
+select,
+input,
+textarea,
+[role='button'] {
+  touch-action: manipulation;
+}
+
+body {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- tipografi ---------- */
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  color: var(--color-primary);
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--text-h1);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: var(--text-h2);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+h3 {
+  font-family: var(--font-body);
+  font-size: var(--text-h3);
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 0;
+  color: var(--color-ink);
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+/* Veri niteliğindeki her şey mono: tarih, koordinat, UID, yüzde, sayaç.
+   Bu ayrım okuyucuya "bu bir ölçüm/kayıt" sinyali verir. */
+.mono,
+code,
+time,
+.data {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+code {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  padding: 0.12em 0.4em;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- odak görünürlüğü ---------- */
+
+/* Odak halkası amber DEĞİL koyu: amber, açık zemin üzerinde 2.0:1 kontrast
+   veriyordu ve WCAG'ın odak göstergesi için istediği 3:1'in altında kalıyordu
+   — üstelik amber butonun üzerinde tamamen kayboluyordu. Koyu ton her açık
+   yüzeyde 16:1 veriyor. */
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Koyu navbar üzerinde koyu halka görünmez; orada amber 4.9:1 ile çalışıyor */
+.navbar :focus-visible,
+.footer :focus-visible {
+  outline-color: var(--color-accent);
+}
+
+/* Görsel olarak gizle ama erişilebilirlik ağacında bırak.
+   `display: none` metni ekran okuyucudan da siler — etiketler için yanlış. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- içeriğe geç bağlantısı ---------- */
+
+.skip-link {
+  position: absolute;
+  top: -200px;
+  left: var(--space-4);
+  z-index: 2000;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  transition: top var(--dur-fast) var(--ease);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+.app__main:focus {
+  outline: none;
+}
+
+/* ---------- iskelet ---------- */
+
+.app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.app__main {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+.page {
+  height: 100%;
+  overflow-y: auto;
+  /* Alt dolgu, üzerine binen alt bilgi şeridinin yüksekliğini karşılıyor */
+  padding: var(--space-6) var(--space-4) calc(var(--space-7) + 80px);
+  animation: fade-rise var(--dur-mid) var(--ease) both;
+}
+
+/* Ortalama `align-items: center` ile değil, çocuğa `margin: auto` vererek
+   yapılıyor. Sebebi: flex/grid ile ortalanan bir öğe kapsayıcıdan uzun
+   olduğunda taşan kısma kaydırılamaz — üstü ve altı erişilemez biçimde
+   kesilir. `margin: auto` yer varken ortalar, yer yokken kenarlara yapışır
+   ve içerik tamamen kaydırılabilir kalır. */
+.page--centered {
+  display: flex;
+}
+
+.page--centered > * {
+  margin: auto;
+}
+
+/* ---------- alt bilgi ---------- */
+
+/* Alt bilgi akışın dışında, içeriğin üzerinde yüzüyor — böylece ana sayfada
+   arkasında harita görünüyor. `pointer-events: none` olmasının sebebi:
+   şerit haritanın üzerinde durduğu için, o alandan haritayı sürüklemek
+   engellenmemeli. İçinde tıklanabilir öğe yok, kaybımız olmuyor. */
+.footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 550;
+  background: transparent;
+  pointer-events: none;
+}
+
+/* Harita DIŞINDAKİ sayfalarda şerit zemin alıyor: o sayfalar kaydırılabilir
+   ve içerik şeridin altından geçerken iki metin üst üste binip okunmaz hale
+   geliyordu. Haritada (body.on-map) şeffaflık aynen korunuyor. */
+body:not(.on-map) .footer {
+  background: var(--color-background);
+  border-top: 1px solid var(--color-border);
+}
+
+body:not(.on-map) .footer__text {
+  text-shadow: none;
+}
+
+/* Arma üstte ortada, yazı altında */
+.footer__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  text-align: center;
+}
+
+/* Yuvarlak arma detay yoğun (saat kulesi, dairesel yazı). 40px'in altında
+   okunaksız bir lekeye dönüşüyor; yanındaki metin kurumun adını zaten
+   yazdığı için burada amblem "okunmak" değil "tanınmak" zorunda. */
+.footer__logo {
+  height: 34px;
+  width: auto;
+  flex: none;
+}
+
+/* Zemin şeffaf olduğu için metin haritanın koyu bölgelerine (su, park)
+   denk gelebiliyor. Beyaz hale, açık zeminde görünmez kalıp koyu zeminde
+   okunurluğu kurtarıyor — panel eklemeden. */
+.footer__text {
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--color-muted);
+  max-width: 90ch;
+  text-shadow:
+    0 1px 2px rgba(255, 255, 255, 0.9),
+    0 0 6px rgba(255, 255, 255, 0.7);
+}
+
+.footer__text strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* ---------- logo ---------- */
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: inherit;
+}
+
+/* İşaret maske olarak çiziliyor: PNG yalnızca şekli veriyor, rengi
+   currentColor belirliyor. Tek dosya her zeminde doğru renkte görünüyor.
+   Oran 192:256 = 0.75 (kaynak dosyanın en-boy oranı). */
+.logo__mark {
+  display: block;
+  flex: none;
+  width: calc(var(--logo-size, 28px) * 0.75);
+  height: var(--logo-size, 28px);
+  background-color: currentColor;
+  -webkit-mask-image: url('/logo-mark.png');
+  mask-image: url('/logo-mark.png');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.logo__wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+/* ---------- navbar ---------- */
+
+.navbar {
+  position: relative;
+  z-index: 1200;
+  /* Duz dolgu yerine cok hafif bir dikey gecis: seride derinlik veriyor,
+     alt kenari da kendiliginden koyulastirip sayfadan ayiriyor. */
+  background: linear-gradient(180deg, #205a51 0%, var(--color-primary) 70%);
+  color: #fff;
+  transition: box-shadow var(--dur-mid) var(--ease);
+}
+
+.app[data-scrolled='true'] .navbar {
+  box-shadow: 0 6px 20px rgba(18, 58, 51, 0.28);
+}
+
+.navbar__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-5);
+}
+
+.navbar__brand {
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Gezinme seridi bastan sona yayiliyor: sol kume markanin yaninda,
+   sag kume kenarda. Ortadaki bosluk ikisini birbirinden ayiran sey. */
+.navbar__nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.navbar__links,
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.navbar__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.navbar__link:hover {
+  color: #fff;
+}
+
+/* Aktif sayfa amber YAZI ile işaretleniyor, amber ZEMİN ile değil.
+   Sebebi: /login gibi sayfalarda aktif link ile amber "Kayıt Ol" butonu
+   yan yana geliyor ve iki dolu amber alan birbiriyle yarışıyordu. Dolu
+   amber tek bir yerde kalsın — birincil eylem butonunda.
+
+   Yarı saydam beyaz kutu kaldırıldı: amber yazıyla birleşince bulanık,
+   "hover'da takılı kalmış" bir görüntü veriyordu. Yerine etiketin altına
+   oturan ince bir amber çizgi — dolu alan değil, konum işareti. */
+.navbar__link.active {
+  color: var(--color-accent-on-dark);
+  font-weight: 600;
+}
+
+.navbar__link::after {
+  content: '';
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: 2px;
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+/* Hover aynı çizgiyi soluk gösteriyor: fare gezerken hangi işaretin
+   geleceği önden belli oluyor. */
+.navbar__link:hover::after {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.navbar__link.active::after {
+  background: var(--color-accent-on-dark);
+}
+
+/* --- birincil eylem: bildirim oluştur --- */
+
+.navbar__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: var(--space-2);
+  padding: 0.34rem 0.9rem 0.34rem 0.34rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-primary-dark);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(242, 169, 59, 0.28);
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.navbar__cta:hover {
+  background: #ffbc55;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(242, 169, 59, 0.36);
+}
+
+.navbar__cta:active {
+  transform: translateY(0);
+}
+
+/* Artı işareti kendi kuyusunda: amber hapın içinde ikinci bir odak
+   noktası, butonu düz bir etiketten ayırıyor. */
+.navbar__cta-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: rgba(18, 58, 51, 0.14);
+}
+
+/* --- hesap --- */
+
+/* E-posta daha önce çıplak, stilsiz bir metindi ve hata ayıklama çıktısı
+   gibi duruyordu. Baş harf + adres tek bir nesne olarak kapsülleniyor. */
+.navbar__account {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 240px;
+  margin-left: var(--space-3);
+  padding: 3px 12px 3px 3px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+/* Baş harf yeşil kalıyor, amber değil: amber bu seritte yalnızca iki yerde
+   olsun — aktif sayfa çizgisi ve "Bildir". Üçüncüsü rekabet yaratırdı. */
+.navbar__avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Mono, çünkü e-posta bir tanımlayıcı — sistemde mono zaten bildirim
+   numarası ve koordinat gibi makine değerlerine ayrılmış. */
+.navbar__email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  /* 0.74'te 4.48:1 idi — 4.5'in kil payi altinda. */
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Çerçeveli hayalet butondu; yanındaki aktif sayfa kutusuyla yarışıyordu.
+   Serideki tek çerçeveli öge amber "Bildir" olsun. */
+.navbar__logout {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.navbar__logout:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.navbar__logout:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.navbar__toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.navbar__toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Mobil menü perdesi.
+   Yalnızca çekmece varken anlamlı — hamburger 861px'in üstünde gizli, ama
+   pencere genişletilirse React tarafı menüyü kapatıyor (bkz. Navbar.jsx
+   matchMedia dinleyicisi). Bu kural yine de bir emniyet kemeri. */
+.navbar__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: rgba(18, 58, 51, 0.5);
+  animation: fade-in var(--dur-fast) var(--ease) both;
+}
+
+@media (min-width: 861px) {
+  .navbar__scrim {
+    display: none;
+  }
+}
+
+/* ---------- butonlar ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0.65rem 1.15rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+/* Amber yalnızca "asıl eylem" için: bildirim gönderme, yeni bildirim. */
+.btn--accent {
+  background: var(--color-accent);
+  color: var(--color-ink);
+}
+
+.btn--accent:hover:not(:disabled) {
+  background: var(--color-accent-dark);
+}
+
+.btn--outline {
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-primary);
+}
+
+.btn--outline:hover:not(:disabled) {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.btn--sm {
+  padding: 0.4rem 0.75rem;
+  font-size: var(--text-caption);
+}
+
+/* Yıkıcı eylem: dolu kırmızı yalnızca onay adımında görünür.
+   İlk halinde soluk durur ki listede göz yormasın ve yanlışlıkla
+   basılacak kadar davetkâr olmasın. */
+.btn--danger {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: #922e23;
+}
+
+/* Çerçevesi var ki buton olduğu anlaşılsın, ama dolu değil ki
+   yanlışlıkla basılacak kadar davetkâr olmasın. */
+.btn--danger-ghost {
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-danger);
+}
+
+.btn--danger-ghost:hover:not(:disabled) {
+  background: var(--color-danger-soft);
+  border-color: rgba(179, 57, 44, 0.4);
+}
+
+.delete-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.delete-action__question {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-danger);
+  white-space: nowrap;
+}
+
+.delete-action__error {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--color-danger);
+  max-width: 220px;
+}
+
+.detail__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* ---------- formlar ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.field__label {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: 0.01em;
+}
+
+.field__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.field__error {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-danger);
+}
+
+.input {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-surface);
+  /* Sınır, alanın nerede başladığını göstermek zorunda: 3:1 gerekiyor */
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--color-primary);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(27, 75, 67, 0.14);
+}
+
+.input--invalid {
+  border-color: var(--color-danger);
+}
+
+/* Gönderimde ilk hatalı alana kaydırıldığında kısa bir halka atıyor:
+   kaydırma bitince gözün nereye bakacağı belli olsun. Sınıfı JS ekleyip
+   ~700 ms sonra kaldırıyor — bkz. src/utils/formFocus.js
+   Azaltılmış hareket bloğu animasyonları zaten kapatıyor. */
+@keyframes field-flag {
+  from {
+    box-shadow: 0 0 0 0 rgba(179, 57, 44, 0.5);
+  }
+  to {
+    box-shadow: 0 0 0 12px rgba(179, 57, 44, 0);
+  }
+}
+
+.is-flagged {
+  animation: field-flag 700ms var(--ease);
+}
+
+.input--invalid:focus {
+  box-shadow: 0 0 0 3px rgba(179, 57, 44, 0.14);
+}
+
+.input:disabled {
+  background: var(--color-surface-sunken);
+  cursor: not-allowed;
+}
+
+textarea.input {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.55;
+}
+
+select.input {
+  cursor: pointer;
+}
+
+.input--compact {
+  padding: 0.4rem 0.6rem;
+  font-size: var(--text-caption);
+  min-width: 140px;
+}
+
+.input--file {
+  padding: var(--space-2);
+  cursor: pointer;
+}
+
+.input--file::file-selector-button {
+  font: inherit;
+  font-weight: 600;
+  margin-right: var(--space-3);
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.input--file::file-selector-button:hover {
+  background: #d9e6e1;
+}
+
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  border: 1px solid transparent;
+}
+
+.alert--error {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  border-color: rgba(179, 57, 44, 0.22);
+}
+
+.alert--warning {
+  background: var(--color-accent-soft);
+  color: #7a5310;
+  border-color: rgba(242, 169, 59, 0.4);
+}
+
+.alert--warning code {
+  background: rgba(242, 169, 59, 0.2);
+  color: #6b480d;
+}
+
+/* ---------- rozetler ---------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.22rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  /* Dolgu üzerindeki yazı rengi duruma göre değişiyor: kırmızı ve yeşilin
+     üstünde beyaz, sarının üstünde koyu. */
+  color: var(--badge-ink, #fff);
+  background: var(--badge-color, var(--color-primary));
+  /* Admin panelinde durum değişince renk yumuşak geçsin */
+  transition:
+    background-color var(--dur-mid) var(--ease),
+    color var(--dur-mid) var(--ease),
+    border-color var(--dur-mid) var(--ease);
+}
+
+/* Açık zeminde yazı: dolgu tonu değil, koyulaştırılmış tonu kullanılıyor —
+   sarı beyaz üzerinde okunmuyor. */
+.badge--outline {
+  background: transparent;
+  color: var(--badge-text, var(--badge-color, var(--color-primary)));
+  border-color: var(--badge-color, var(--color-primary));
+}
+
+.badge--soft {
+  background: color-mix(in srgb, var(--badge-color) 14%, transparent);
+  color: var(--badge-text, var(--badge-color));
+  border-color: color-mix(in srgb, var(--badge-color) 32%, transparent);
+}
+
+.badge svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+}
+
+/* ---------- ana sayfa / harita ---------- */
+
+.home {
+  position: relative;
+  height: 100%;
+  animation: fade-in var(--dur-mid) var(--ease) both;
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+  background: var(--color-surface-sunken);
+}
+
+/* Harita işaretçisi: damla biçimli pin, rengi durum, simgesi kategori */
+.map-pin-host {
+  background: none;
+  border: none;
+}
+
+.map-pin-wrap {
+  position: relative;
+  display: block;
+  width: 34px;
+  height: 34px;
+}
+
+/* Durum rozeti: rengin yanında BİÇİM de veriyor (saat / büyüteç / onay).
+   Renk körü kullanıcı bekleyen ile çözülmüşü ayırt edebilsin. */
+.map-pin__status {
+  position: absolute;
+  right: -3px;
+  bottom: -1px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid var(--pin-color);
+  color: var(--pin-text, var(--color-ink));
+  box-shadow: 0 1px 3px rgba(22, 35, 31, 0.3);
+  /* Pin'le birlikte belirsin ama onun dönme animasyonunu almasın */
+  animation: fade-in var(--dur-slow) var(--ease) both;
+  animation-delay: calc(var(--pin-index, 0) * 35ms);
+}
+
+.map-pin__status svg {
+  width: 10px;
+  height: 10px;
+}
+
+.map-pin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: var(--pin-color, var(--color-primary));
+  border: 2.5px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 3px 10px rgba(22, 35, 31, 0.35);
+  animation: pin-drop var(--dur-slow) var(--ease) both;
+  /* Öğe başına 35ms: önerilen 20-40ms aralığında. 60ms'te 20 işaretçinin
+     tamamının belirmesi 1,2 saniye sürüyordu ve ağır hissettiriyordu. */
+  animation-delay: calc(var(--pin-index, 0) * 35ms);
+}
+
+.map-pin--picker {
+  background: var(--color-primary);
+  animation: none;
+}
+
+/* ---------- üst üste binen işaretçiler ----------
+   Aynı noktadaki bildirimler tek sayaçta toplanıyor; tıklayınca bir çember
+   üzerine dağılıyorlar. Konum değişmiyor, her üye kendi yerine ince bir
+   çizgiyle bağlanıyor. */
+
+.map-cluster {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  /* Nötr renk bilinçli: bu tasarımda renk yalnızca durumu anlatıyor, karışık
+     durumlu bir kümeyi tek renge indirmek yanlış bilgi verirdi. */
+  background: var(--color-ink);
+  color: #fff;
+  border: 3px solid #fff;
+  box-shadow: 0 3px 12px rgba(22, 35, 31, 0.4);
+  cursor: pointer;
+  animation: pin-drop var(--dur-slow) var(--ease) both;
+  transition:
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.map-cluster::after {
+  /* Yayılan halka: sayacın tıklanabilir olduğunu sessizce söylüyor */
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid var(--color-ink);
+  animation: cluster-pulse 2.4s var(--ease) infinite;
+}
+
+.map-cluster:hover {
+  transform: scale(1.12);
+  box-shadow: 0 5px 18px rgba(22, 35, 31, 0.5);
+}
+
+.map-cluster__count {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.map-cluster-host.is-selected .map-cluster {
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.95),
+    0 5px 16px rgba(22, 35, 31, 0.45);
+}
+
+/* Üye, merkezden kendi yerine açılıyor. Öteleme değişkenleri ikonun içinde
+   inline veriliyor (bkz. spiderIcon) ve otelemenin TERSİ: animasyon merkezde
+   başlayıp gerçek konumda bitiyor. */
+.map-pin-wrap--spider {
+  animation: spider-out 380ms var(--ease) both;
+  animation-delay: calc(var(--spider-order, 0) * 45ms);
+}
+
+/* Bağlantı çizgisi kendini çiziyor */
+.map-spider-leg {
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+  stroke-opacity: 0.45;
+  stroke-dasharray: 4 3;
+  fill: none;
+  animation: leg-draw 420ms var(--ease) both;
+}
+
+/* Seçili işaretçi öne çıkar: büyür, beyaz halka alır */
+.map-pin-host.is-selected {
+  z-index: 1000 !important;
+}
+
+.map-pin--selected {
+  animation: none;
+  transform: rotate(-45deg) scale(1.18);
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.95),
+    0 5px 16px rgba(22, 35, 31, 0.45);
+}
+
+.map-pin__glyph {
+  display: grid;
+  place-items: center;
+  transform: rotate(45deg);
+  color: var(--pin-ink, #fff);
+}
+
+.map-pin__glyph svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* ---------- harita süzgeci ----------
+   Üst ortada, yarı saydam. Bu bölge boş: zoom sol üstte, istatistik sağda,
+   açıklama sol altta, alt bilgi altta. */
+
+.map-filters {
+  position: absolute;
+  top: var(--space-4);
+  left: 50%;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: calc(100% - var(--space-6));
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-md);
+  animation: filters-in var(--dur-mid) var(--ease) both;
+}
+
+.map-filters__icon {
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+  flex: none;
+}
+
+.map-filters__field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.map-filters__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.map-filters__select {
+  font-family: var(--font-body);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-primary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  cursor: pointer;
+  max-width: 118px;
+}
+
+.map-filters__select:hover {
+  background: var(--color-primary-soft);
+}
+
+.map-filters__count {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.map-filters__reset {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.map-filters__reset:hover {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+/* Canlı istatistik paneli — haritanın sağ ortasında, yarı saydam.
+   Dikey yerleşim üç soruyu ayrı ayrı yanıtlamayı mümkün kılıyor:
+   bu ayın akışı, şu anki durum, tüm zamanların toplamı. */
+.stats {
+  position: absolute;
+  right: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 500;
+  width: 176px;
+  max-height: calc(100% - 160px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  /* Kendi keyframe'i var: dikey ortalamayı sağlayan translateY(-50%)
+     animasyon boyunca korunmalı, yoksa panel yerinden fırlar. */
+  animation: stats-in var(--dur-mid) var(--ease) 120ms both;
+}
+
+/* İlçe seçiliyken panelin kapsamını söyleyen başlık */
+.stats__scope {
+  margin: 0;
+  padding-bottom: var(--space-2);
+  border-bottom: 2px solid var(--color-primary);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.stats__group + .stats__group {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.stats__group-title {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-muted);
+}
+
+.stats__row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.stats__row + .stats__row {
+  margin-top: var(--space-1);
+}
+
+.stats__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  align-self: center;
+}
+
+.stats__value {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+  line-height: 1.1;
+}
+
+.stats__value--sm {
+  font-size: 1rem;
+}
+
+.stats__label {
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  color: var(--color-muted);
+}
+
+.stats__rate {
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--color-border);
+  font-size: 0.7rem;
+  color: var(--color-muted);
+}
+
+.stats__rate strong {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  /* Dolgu tonu değil yazı tonu — ölçüldü: #2f9e62 burada 3.34:1 kalıyordu */
+  color: var(--color-status-cozuldu-text);
+}
+
+.map-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  pointer-events: none;
+  z-index: 480;
+}
+
+/* Harita üzerindeki öğeler alt bilgi şeridinin üstünde kalmalı.
+   Değerler tahmin değil ölçüm: şerit masaüstünde 72px, kaynak yazısı 15px. */
+.home .leaflet-bottom {
+  bottom: 80px;
+}
+
+.map-legend {
+  position: absolute;
+  left: var(--space-3);
+  bottom: 100px;
+  z-index: 500;
+  padding: var(--space-3);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.map-legend__group + .map-legend__group {
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.map-legend__title {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.map-legend__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.map-legend__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.map-legend__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.map-legend__glyph {
+  display: grid;
+  place-items: center;
+  width: 14px;
+  flex: none;
+  color: var(--color-muted);
+}
+
+.map-legend__glyph svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Leaflet varsayılan denetimlerini tasarım sistemine uydur */
+.leaflet-control-zoom {
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-sm) !important;
+  overflow: hidden;
+}
+
+.leaflet-control-zoom a {
+  color: var(--color-primary) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  font-weight: 600;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--color-primary-soft) !important;
+}
+
+.leaflet-control-attribution {
+  font-family: var(--font-body);
+  font-size: 0.68rem !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+
+/* ---------- bildirim detay paneli ----------
+   Leaflet popup'inin yerini alir. Popup marker'a çıpalanır; konumu
+   işaretçiye bağlı olduğu için haritanın sabit katmanlarıyla çarpışması
+   kaçınılmazdır. Bu panelin yeri sabit — çakışma mümkün değil. */
+
+.report-panel {
+  position: absolute;
+  z-index: 800;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.report-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.report-panel__badges {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.report-panel__close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.report-panel__close:hover {
+  background: var(--color-surface-sunken);
+  color: var(--color-ink);
+}
+
+.report-panel__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.report-panel__image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  display: block;
+}
+
+.report-panel__image--empty {
+  display: grid;
+  place-items: center;
+  gap: var(--space-2);
+  height: 120px;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.report-panel__description {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.report-panel__meta {
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.report-panel__meta > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.report-panel__meta dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted);
+  flex: none;
+}
+
+.report-panel__meta dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  word-break: break-all;
+}
+
+.report-panel__footer {
+  flex: none;
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (min-width: 861px) {
+  /* Masaüstü: ekranın ortasında kart.
+     Genişliği bilerek sınırlı — sağdaki istatistik paneli ve sol alttaki
+     açıklama kutusu açık kalabilsin, üçü birbirine değmesin. */
+  .report-panel {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 380px;
+    max-height: 62%;
+    border-radius: var(--radius-lg);
+    animation: panel-in-center var(--dur-mid) var(--ease) both;
+  }
+}
+
+@media (max-width: 860px) {
+  /* Mobil: alttan yükselen sayfa */
+  .report-panel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 72%;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    animation: panel-in-bottom var(--dur-mid) var(--ease) both;
+  }
+
+  /* Sayfa alttan yükseldiğinde kurumsal şerit çekilir — aynı anda tek
+     katman kuralı. Panel kapanınca geri gelir. */
+  body.has-report-panel .footer {
+    display: none;
+  }
+}
+
+/* ---------- kartlar ---------- */
+
+.card--floating,
+.card--standalone {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-5);
+  max-width: 380px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.card--floating {
+  pointer-events: auto;
+}
+
+.card__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.card__text {
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+/* ---------- liste düzeni ---------- */
+
+.list {
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.list__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.list__title {
+  font-size: var(--text-h2);
+}
+
+.list__count {
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ---------- bildirim kartı ---------- */
+
+.report-card {
+  display: flex;
+  align-items: stretch;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.report-card:hover {
+  transform: translateY(-2px);
+  border-color: #c6d0cc;
+  box-shadow: var(--shadow-md);
+}
+
+.report-card__link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+}
+
+.report-card__actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-3) var(--space-3) 0;
+}
+
+.report-card__thumb {
+  width: 88px;
+  height: 88px;
+  flex: none;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.report-card__thumb--empty {
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+}
+
+.report-card__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.report-card__head {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.report-card__description {
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.report-card__meta {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+/* ---------- detay sayfası ---------- */
+
+.detail {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail__back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: gap var(--dur-fast) var(--ease);
+}
+
+.detail__back:hover {
+  gap: 0.6rem;
+}
+
+.detail__card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.detail__image {
+  width: 100%;
+  max-height: 420px;
+  object-fit: cover;
+  display: block;
+  background: var(--color-surface-sunken);
+}
+
+/* Görsel inmeden önce de yerini kaplasın — yüklendiğinde altındaki içeriği
+   aşağı itmesin. Yalnızca <img> için: aynı sınıfı taşıyan "fotoğraf yok"
+   kutusu kendi min-height'ını kullanıyor. */
+img.detail__image {
+  aspect-ratio: 16 / 10;
+}
+
+/* ---------- analiz bölgesi çerçevesi ----------
+   Hasar yoğunluğu görselin ortasındaki %20–%80 alanında ölçülüyor; çerçeve de
+   yüzdeyle konumlanıyor, yani hangi boyutta gösterilirse gösterilsin tam o
+   alanı işaretliyor. Hem detay sayfasında hem harita panelinde aynı çerçeve.
+
+   Bunun doğru olması için görselin KIRPILMAMASI şart. Her iki yerdeki
+   varsayılan kural (detayda 16/10, panelde 180px) object-fit: cover ile
+   kırpıyor — o durumda çerçeve fotoğrafın analiz edilmeyen bir yerini
+   gösterirdi.
+
+   Kırpmayı yalnızca çerçevenin OLDUĞU kartlarda kaldırıyoruz (:has). Yoğunluk
+   değeri olmayan eski kayıtlar eski kompakt görünümünü koruyor. */
+.detail__image-wrap,
+.report-panel__image-wrap,
+.preview__frame {
+  position: relative;
+  display: block;
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  /* line-height: satır içi görselin altında kalan boşluk sarmalayıcıyı
+     görselden yüksek yapar ve çerçeveyi kaydırır. */
+  line-height: 0;
+  /* Panel gövdesi overflow-y:auto bir flex sütunu; sarmalayıcı varsayılan
+     olarak daralabilir. Daralınca görselin kendisi 180px kalıyor ama
+     overflow:hidden fazlasını KIRPIYOR — görsel yassı bir şeride dönüşüyordu.
+     Ölçüldü: 900px pencerede 176px, 600px pencerede 45px. */
+  flex: none;
+}
+
+.detail__image-wrap:has(.roi-overlay) img.detail__image {
+  aspect-ratio: auto;
+  height: auto;
+  max-height: none;
+  object-fit: fill;
+}
+
+/* Panel ve önizlemede görsel yüksekliği sınırlı olmalı — yoksa kare bir
+   fotoğraf panelin tamamını kaplıyor. Ama `max-height` + `object-fit: contain`
+   İŞE YARAMAZ: o zaman görsel kutunun içinde ortalanır (letterbox), element
+   kutusu ile görselin kendisi ayrışır ve yüzdeyle konumlanan çerçeve kayar.
+
+   Doğru yol: yüksekliği sınırlarken GENİŞLİĞİ serbest bırakmak. Görsel
+   orantılı küçülüyor, element kutusu tam görselin kutusu oluyor. Sarmalayıcı
+   da `width: fit-content` ile onu kucaklıyor. */
+.report-panel__image-wrap:has(.roi-overlay),
+.preview__frame:has(.roi-overlay) {
+  width: fit-content;
+  max-width: 100%;
+  align-self: center;
+}
+
+.report-panel__image-wrap:has(.roi-overlay) img.report-panel__image,
+.preview__frame:has(.roi-overlay) img.preview__image {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 220px;
+  object-fit: fill;
+}
+
+.roi-overlay {
+  position: absolute;
+  top: 20%;
+  right: 20%;
+  bottom: 20%;
+  left: 20%;
+  border: 3px solid var(--color-analysis);
+  border-radius: 4px;
+  pointer-events: none;
+  animation: roi-in var(--dur-slow) var(--ease) both;
+}
+
+.roi-overlay__label {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  transform: translateY(-100%);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px 4px 0 0;
+  /* Çerçevenin kendisi --color-analysis kalıyor (metin değil, 3:1 yeterli);
+     üzerinde beyaz yazı taşıyan etiket bir ton koyu. */
+  background: var(--color-analysis-strong);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* Panel dar: etiket görselin sağ kenarından taşmasın */
+.report-panel__image-wrap .roi-overlay__label {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+}
+
+.detail__image--empty {
+  display: grid;
+  place-items: center;
+  gap: var(--space-2);
+  min-height: 160px;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+.detail__body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail__badges {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.detail__title {
+  font-size: var(--text-h2);
+}
+
+.detail__description {
+  font-size: var(--text-body);
+  line-height: 1.7;
+}
+
+.detail__meta {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-md);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.detail__meta-row {
+  display: flex;
+  gap: var(--space-4);
+  align-items: baseline;
+  font-size: var(--text-caption);
+}
+
+.detail__meta-row dt {
+  min-width: 108px;
+  flex: none;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.detail__meta-row dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+.detail__section-title {
+  font-size: var(--text-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.detail__map-wrap {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.detail__map {
+  height: 280px;
+  width: 100%;
+  z-index: 0;
+}
+
+.detail__no-map {
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+/* ---------- ZAMAN ÇİZELGESİ (imza bileşen) ----------
+   Bildirimin yaşam döngüsünü üç düğümde anlatır. Yalnızca detay
+   sayfasında kullanılır — başka hiçbir yerde tekrarlanmaz. */
+
+.timeline-wrap {
+  background: var(--color-surface-sunken);
+  border-radius: var(--radius-md);
+  padding-bottom: var(--space-4);
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-5) var(--space-2) var(--space-3);
+  display: flex;
+}
+
+.timeline__step {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+/* Düğümler arası bağlantı çizgisi.
+   Açılışta soldan sağa çiziliyor: raylar döşeniyor gibi. */
+.timeline__step::before {
+  content: '';
+  position: absolute;
+  top: 19px;
+  right: 50%;
+  left: -50%;
+  height: 2px;
+  background: var(--color-border);
+  transform-origin: left center;
+  transition: background-color var(--dur-slow) var(--ease);
+  animation: timeline-line-in 260ms var(--ease) both;
+  /* i. adımın çizgisi, (i-1). düğümden hemen sonra başlar */
+  animation-delay: calc(var(--step-index, 0) * 240ms - 120ms);
+}
+
+.timeline__step:first-child::before {
+  display: none;
+}
+
+.timeline__step.is-reached::before {
+  background: var(--step-color);
+}
+
+.timeline__node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  color: var(--color-muted);
+  transition:
+    background-color var(--dur-mid) var(--ease),
+    border-color var(--dur-mid) var(--ease),
+    color var(--dur-mid) var(--ease),
+    box-shadow var(--dur-mid) var(--ease);
+  animation: timeline-node-in 280ms var(--ease) both;
+  animation-delay: calc(var(--step-index, 0) * 240ms);
+}
+
+/* Etiket ve tarih, kendi düğümüyle birlikte belirir */
+.timeline__label,
+.timeline__time {
+  animation: timeline-text-in 260ms var(--ease) both;
+  animation-delay: calc(var(--step-index, 0) * 240ms + 80ms);
+}
+
+.timeline__node svg {
+  width: 18px;
+  height: 18px;
+}
+
+.timeline__step.is-reached .timeline__node {
+  background: var(--step-color);
+  border-color: var(--step-color);
+  color: var(--step-ink, #fff);
+}
+
+/* Mevcut adımın halkası en son açılır — dizinin varış noktası o. */
+.timeline__step.is-current .timeline__node {
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--step-color) 22%, transparent);
+  animation:
+    timeline-node-in 280ms var(--ease) both,
+    timeline-ring-in 340ms var(--ease) both;
+  animation-delay:
+    calc(var(--step-index, 0) * 240ms),
+    calc(var(--step-index, 0) * 240ms + 200ms);
+}
+
+.timeline__label {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--color-muted);
+  transition: color var(--dur-mid) var(--ease);
+}
+
+.timeline__step.is-reached .timeline__label {
+  color: var(--color-ink);
+}
+
+.timeline__step.is-current .timeline__label {
+  color: var(--step-text, var(--step-color));
+  font-weight: 700;
+}
+
+.timeline__time {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-muted);
+  line-height: 1.3;
+}
+
+.timeline__step:not(.is-reached) .timeline__time {
+  opacity: 0.55;
+}
+
+.timeline__hint {
+  margin: 0;
+  padding: 0 var(--space-4);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* ---------- bildirim formu ---------- */
+
+.form-card {
+  max-width: 620px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-card__header {
+  margin-bottom: var(--space-1);
+}
+
+.form-card__title {
+  font-size: var(--text-h2);
+}
+
+.form-card__subtitle {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+/* Adım adım his: her adım kendi kartında, numaralı başlıkla */
+.form-step {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.form-step__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.form-step__number {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.form-step__title {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.form-card__actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  padding-top: var(--space-1);
+}
+
+/* ---------- fotoğraf önizleme ---------- */
+
+.preview {
+  display: grid;
+  place-items: center;
+  /* Önizleme kutusu açılır açılmaz yerini alsın; fotoğraf çözülünce
+     aşağıdaki adımlar zıplamasın */
+  min-height: 180px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-surface-sunken);
+  animation: fade-rise var(--dur-mid) var(--ease) both;
+}
+
+.preview__image {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+}
+
+/* ---------- AI tahmin kutusu ---------- */
+
+.predict-box {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-primary-soft);
+  border: 1px solid rgba(27, 75, 67, 0.16);
+  border-left: 3px solid var(--predict-color, var(--color-primary));
+  border-radius: var(--radius-sm);
+  animation: predict-in var(--dur-slow) var(--ease) both;
+}
+
+.predict-box--loading {
+  align-items: center;
+  border-left-color: var(--color-primary);
+  animation: none;
+}
+
+/* Model emin olamadi. Yesil "basarili tahmin" tonu yerine, mukerrer bildirim
+   uyarisiyla ayni amber aile: kullanicidan bir sey yapmasi bekleniyor. */
+.predict-box--uncertain {
+  --predict-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border-color: rgba(242, 169, 59, 0.45);
+}
+
+.predict-box__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--predict-color, var(--color-primary));
+}
+
+.predict-box__text {
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: 1.55;
+}
+
+.predict-box__confidence {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.predict-box__note {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+/* ---------- hasar yoğunluğu (OpenCV) ----------
+   Kategori tahmininden ayrı bir adım olduğu için görünümü de ayrı: dolu bir
+   kutu değil, altına düşen sade bir ölçüm satırı. */
+
+.density {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-analysis);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+  animation: fade-rise var(--dur-mid) var(--ease) both;
+}
+
+.density--loading {
+  border-left-color: var(--color-border-strong);
+  animation: none;
+}
+
+.density__icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-analysis);
+}
+
+.density__line {
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: 1.5;
+}
+
+.density__value {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--color-analysis);
+}
+
+.density__note {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+/* ---------- fotoğraf netliği ----------
+   Amber aile: kullanıcıdan bir şey yapması bekleniyor ama zorunlu değil —
+   mükerrer bildirim uyarısıyla aynı ton. Kırmızı olsaydı "hata" derdi;
+   bu bir öneri. */
+
+.quality {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-accent-soft);
+  border: 1px solid rgba(242, 169, 59, 0.45);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  animation: fade-rise var(--dur-mid) var(--ease) both;
+}
+
+.quality__icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-accent-dark);
+}
+
+.quality__line {
+  margin: 0;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1.5;
+  color: #7a5310;
+}
+
+.quality__note {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: #7a5310;
+}
+
+/* ---------- mükerrer bildirim uyarısı ---------- */
+
+.nearby {
+  padding: var(--space-4);
+  background: var(--color-accent-soft);
+  border: 1px solid rgba(242, 169, 59, 0.45);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  animation: fade-rise var(--dur-mid) var(--ease) both;
+}
+
+.nearby__title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  color: #7a5310;
+}
+
+.nearby__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.nearby__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.nearby__ref {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.nearby__meta {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.nearby__note {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: #7a5310;
+}
+
+/* Onay durumu: kutu bilgilendirmeden karar noktasına dönüşüyor, kenarlığı
+   kalınlaşıp öne çıkıyor. */
+.nearby--confirming {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
+}
+
+.nearby--confirming:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.nearby__confirm {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid rgba(242, 169, 59, 0.5);
+}
+
+.nearby__question {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.nearby__confirm .nearby__note {
+  margin-top: var(--space-2);
+}
+
+.nearby__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* ---------- konum ---------- */
+
+.geo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  font-size: var(--text-caption);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.geo--ok {
+  color: #1d6b45;
+  background: rgba(47, 158, 98, 0.09);
+  border-color: rgba(47, 158, 98, 0.32);
+}
+
+.geo--error {
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+  border-color: rgba(179, 57, 44, 0.24);
+}
+
+.geo__coords {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.geo__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.location-picker {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  animation: fade-rise var(--dur-mid) var(--ease) both;
+}
+
+.location-picker__map {
+  height: 260px;
+  width: 100%;
+  z-index: 0;
+}
+
+.location-picker__hint {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--color-muted);
+  background: var(--color-surface-sunken);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ---------- yükleme ilerlemesi ---------- */
+
+/* Etiket çubuğun üstünde değil üzerinde duruyor: dolan kısım koyu yeşil
+   olduğu için içine yazılan metin okunamıyordu. */
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.progress__track {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width var(--dur-mid) var(--ease);
+}
+
+.progress__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* ---------- belediye açıklaması ----------
+   Zaman çizelgesi "ne zaman" der; bu kutu "ne yapıldı" der. Kurumsal ses
+   olduğu için marka yeşiliyle işaretleniyor, kullanıcı metninden ayrışsın. */
+
+.admin-note {
+  padding: var(--space-4);
+  background: var(--color-primary-soft);
+  border: 1px solid rgba(27, 75, 67, 0.18);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+}
+
+.admin-note--compact {
+  padding: var(--space-3);
+}
+
+.admin-note__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+}
+
+.admin-note__text {
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: 1.6;
+  color: var(--color-ink);
+  white-space: pre-wrap;
+}
+
+.admin-note__meta {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+/* ---------- not düzenleyici (admin) ---------- */
+
+.note-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.note-editor__input {
+  min-height: 68px;
+  font-size: var(--text-caption);
+}
+
+.note-editor__counter {
+  align-self: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--color-muted);
+}
+
+.note-editor__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.admin-card__note {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  color: var(--color-primary-dark);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- admin ---------- */
+
+/* ---------- ilçe dağılımı (admin) ---------- */
+
+.district-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.district-stats__tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+
+.district-stats__tile:hover {
+  transform: translateY(-2px);
+  border-color: #c6d0cc;
+  box-shadow: var(--shadow-md);
+}
+
+.district-stats__tile.is-active {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(27, 75, 67, 0.16);
+}
+
+/* En çok bildirim alan ilçe — yalnızca tek bir lider varsa vurgulanıyor */
+.district-stats__tile.is-top {
+  background: var(--color-primary-soft);
+}
+
+.district-stats__tile--muted {
+  cursor: default;
+  background: var(--color-surface-sunken);
+  color: var(--color-muted);
+}
+
+.district-stats__tile--muted:hover {
+  transform: none;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.district-stats__count {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+  line-height: 1.1;
+}
+
+.district-stats__tile--muted .district-stats__count {
+  color: var(--color-muted);
+}
+
+.district-stats__label {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.district-stats__badge {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-ink);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Kart üzerindeki ilçe etiketi */
+.district-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.admin__filter {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+/* Etiket ve secici birlikte sarmali: duz flex-wrap'te satir sonuna denk
+   gelen bir etiket, secicisinden kopup bir ustte kaliyordu. */
+.admin__filter-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* .input width:100% tasiyor — flex satirinda her secici kendi satirina
+   dusuyordu. Suzgec cubugunda genislik icerige gore. */
+.admin__filter .input {
+  width: auto;
+}
+
+.admin__filter-group .field__label {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.admin__filter-icon {
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+}
+
+/* Uc suzgec bir arada olunca "kac kayit elendi" sorusu ortaya cikiyor.
+   Haritadaki suzgec cubugu da ayni bilgiyi veriyor. */
+.admin__filter-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.admin-card {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.admin-card:hover {
+  transform: translateY(-2px);
+  border-color: #c6d0cc;
+  box-shadow: var(--shadow-md);
+}
+
+.admin-card__thumb {
+  width: 72px;
+  height: 72px;
+  flex: none;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-sunken);
+}
+
+.admin-card__thumb--empty {
+  display: grid;
+  place-items: center;
+  color: var(--color-muted);
+}
+
+.admin-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.admin-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.admin-card__description {
+  margin: 0;
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.admin-card__meta {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.admin-card__uid {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-card__control {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+
+/* ---------- toast ---------- */
+
+.toast {
+  position: absolute;
+  top: var(--space-4);
+  left: 50%;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: calc(100% - var(--space-6));
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  animation:
+    toast-in var(--dur-mid) var(--ease) both,
+    toast-out var(--dur-slow) var(--ease) 5.3s both;
+}
+
+.toast__icon {
+  display: grid;
+  place-items: center;
+  color: var(--color-accent);
+  flex: none;
+}
+
+.toast__close {
+  display: grid;
+  place-items: center;
+  padding: 2px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.toast__close:hover {
+  color: #fff;
+}
+
+/* ---------- spinner ---------- */
+
+.spinner-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  color: var(--color-muted);
+  font-size: var(--text-caption);
+}
+
+.spinner-wrap--full {
+  height: 100%;
+  min-height: 220px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border: 2.5px solid var(--color-primary-soft);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+/* ---------- kurulum uyarısı ---------- */
+
+.setup-notice {
+  max-width: 540px;
+  padding: var(--space-5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.setup-notice__title {
+  font-size: var(--text-h3);
+}
+
+.setup-notice__text {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.setup-notice__text--muted {
+  color: var(--color-muted);
+  font-size: var(--text-caption);
+}
+
+.setup-notice__code {
+  margin: 0;
+  padding: var(--space-4);
+  background: var(--color-primary-dark);
+  color: #cfe3dd;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+/* ---------- kimlik doğrulama kartı ---------- */
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.auth-card__brand {
+  align-self: center;
+  color: var(--color-primary);
+  margin-bottom: var(--space-1);
+}
+
+.auth-card__title {
+  font-size: var(--text-h2);
+  text-align: center;
+}
+
+.auth-card__subtitle {
+  margin-top: calc(var(--space-2) * -1);
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.auth-card__footer {
+  text-align: center;
+  font-size: var(--text-caption);
+  color: var(--color-muted);
+}
+
+/* ---------- animasyonlar ---------- */
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Marker'lar yukarıdan hafif zıplayarak düşer */
+/* Kümeden açılan üye: merkezden kendi yerine uçuyor */
+@keyframes spider-out {
+  from {
+    opacity: 0;
+    transform: translate(var(--spider-x, 0), var(--spider-y, 0)) scale(0.45);
+  }
+  70% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+/* Bağlantı çizgisi belirirken kesikleri dışa doğru yürüyor.
+   Kesikli bir çizgide klasik "kendini çizme" (dashoffset = tam uzunluk)
+   çalışmaz; dasharray zaten desen için kullanılıyor. Bunun yerine deseni
+   birkaç periyot kaydırıp sönümlendiriyoruz. */
+@keyframes leg-draw {
+  from {
+    stroke-dashoffset: 28;
+    stroke-opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    stroke-opacity: 0.45;
+  }
+}
+
+@keyframes cluster-pulse {
+  0% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+
+/* Analiz çerçevesi: ölçülen alana doğru kapanıyor */
+@keyframes roi-in {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pin-drop {
+  0% {
+    opacity: 0;
+    transform: rotate(-45deg) translate(6px, -6px) scale(0.8);
+  }
+  62% {
+    opacity: 1;
+    transform: rotate(-45deg) translate(-1px, 1px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-45deg) translate(0, 0) scale(1);
+  }
+}
+
+/* AI tahmini geldiğinde kutu belirir ve bir kez nabız atar */
+@keyframes predict-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.012);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Ortalanmış panelin kendi keyframe'i var: translate(-50%, -50%) animasyon
+   boyunca korunmalı, yoksa kart ekranın köşesine fırlar. */
+@keyframes panel-in-center {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 14px)) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes panel-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- zaman çizelgesi giriş dizisi ----
+   Düğüm belirir → çizgi soldan sağa çizilir → sonraki düğüm → …
+   → en sonda mevcut adımın halkası açılır. Toplam ~800ms. */
+
+@keyframes timeline-node-in {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes timeline-line-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes timeline-ring-in {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--step-color) 22%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--step-color) 22%, transparent);
+  }
+}
+
+@keyframes timeline-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Süzgeç yatayda ortalı: translateX(-50%) animasyon boyunca korunmalı. */
+@keyframes filters-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes stats-in {
+  from {
+    opacity: 0;
+    transform: translate(14px, -50%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -18px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -12px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- mobil ---------- */
+
+@media (max-width: 860px) {
+  :root {
+    --text-h1: 2rem;
+    --text-h2: 1.45rem;
+  }
+
+  /* ---- dokunma hedefleri ----
+     Ölçtük: mobilde butonlar 40px, süzgeç menüleri 22px yükseklikteydi.
+     Parmakla isabetli dokunmak için 44x44 gerekiyor.
+     Cümle içi metin bağlantıları (ör. "Kayıt olun") ve harita kaynak
+     yazısı bilerek dışarıda — WCAG satır içi bağlantıları muaf tutuyor,
+     dolgu vermek metnin akışını bozar. */
+  .btn,
+  .input,
+  .navbar__link,
+  .navbar__cta,
+  .navbar__logout,
+  .navbar__toggle,
+  .map-filters__select,
+  .report-panel__close,
+  .toast__close,
+  .map-filters__reset,
+  .navbar__brand,
+  /* Ölçtük: detayda "Haritaya dön" 22px, mükerrer uyarısındaki referans
+     kodu 19px kalıyordu. İkisi de cümle içi metin değil, tek başına duran
+     gezinme/eylem bağlantısı — muafiyet kapsamına girmiyorlar. */
+  .detail__back,
+  .nearby__ref {
+    min-height: 44px;
+  }
+
+  /* Harita işaretçisi 34x44 ölçülüyordu — yüksekliği yeterli, genişliği değil.
+     Pin'in GÖRÜNEN boyutunu büyütmek haritayı kalabalıklaştırırdı; bunun
+     yerine görünmez bir dokunma alanı ekliyoruz. Tıklama, pseudo-elemandan
+     Leaflet'in dinlediği ana kaba baloncuklanıyor.
+     Üst üste binenler zaten 26px eşiğinde kümeleniyor, yani genişleyen
+     alanlar birbirini yutmuyor. */
+  .map-pin-wrap::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+  }
+
+  /* min-height satır içi öğede işe yaramaz; kutu modelini değiştiriyoruz. */
+  .nearby__ref {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .navbar__toggle,
+  .report-panel__close,
+  .toast__close,
+  .map-filters__reset {
+    min-width: 44px;
+  }
+
+  .navbar__brand {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .map-filters__select {
+    /* Menü kutusu 44'e çıkınca metin dikeyde ortalansın */
+    padding: var(--space-2) 4px;
+  }
+
+  .navbar__inner {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .navbar__toggle {
+    display: inline-flex;
+  }
+
+  /* Linkler navbar'ın altına açılan panele iner */
+  .navbar__nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    /* Bitişik dokunma hedefleri arasında en az 8px — 4px'te yanlış
+       satıra basmak kolaylaşıyor */
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    background: var(--color-primary);
+    box-shadow: 0 14px 24px rgba(18, 58, 51, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    animation: fade-rise var(--dur-fast) var(--ease) both;
+  }
+
+  .navbar__nav.is-open {
+    display: flex;
+  }
+
+  /* Çekmece perdenin üstünde kalmalı */
+  .navbar__nav {
+    z-index: 1;
+  }
+
+  .navbar__links,
+  .navbar__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  /* Dikey listede iki kumeyi ayiran sey artik bosluk degil, ince bir cizgi. */
+  .navbar__actions {
+    padding-top: var(--space-3);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  .navbar__link {
+    padding: var(--space-3);
+    font-size: var(--text-body);
+  }
+
+  /* Dikey listede alt çizgi yanlış işaret: satırın solunda dikey bir kenar
+     "burasi" demenin doğru yolu. */
+  .navbar__link::after {
+    left: 0;
+    right: auto;
+    top: var(--space-2);
+    bottom: var(--space-2);
+    width: 3px;
+    height: auto;
+  }
+
+  .navbar__cta,
+  .navbar__account,
+  .navbar__logout {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .navbar__cta,
+  .navbar__logout {
+    justify-content: center;
+  }
+
+  .navbar__account {
+    max-width: none;
+    /* Hap yerine kart: tam genişlikte hap, altındaki köşeli satırlarla
+       uyumsuz duruyor. */
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .navbar__nav .btn {
+    width: 100%;
+  }
+
+  .page {
+    padding: var(--space-4) var(--space-3) var(--space-6);
+  }
+
+  /* Dokunmatikte parmakla yakınlaştırma zaten var; +/- düğmeleri yalnızca
+     istatistik şeridiyle çakışıyordu. */
+  .leaflet-control-zoom {
+    display: none !important;
+  }
+
+  /* Dar ekranda "Durum"/"Kategori" etiketleri sığmıyor. `display: none`
+     KULLANMIYORUZ — o, etiketi ekran okuyucudan da siler ve menüler isimsiz
+     kalır. Görsel olarak gizleyip erişilebilirlik ağacında bırakıyoruz. */
+  .map-filters {
+    top: var(--space-3);
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .map-filters__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .map-filters__select {
+    max-width: 96px;
+  }
+
+  .map-filters__count {
+    padding-left: var(--space-2);
+  }
+
+  /* Dar ekranda panel daralıyor; sağ kenarda kalıyor ama haritanın
+     yarısını yemiyor. */
+  .stats {
+    right: var(--space-2);
+    width: 134px;
+    max-height: calc(100% - 190px);
+    padding: var(--space-3);
+    gap: var(--space-2);
+    border-radius: var(--radius-md);
+  }
+
+  .stats__group + .stats__group {
+    padding-top: var(--space-2);
+  }
+
+  .stats__value {
+    font-size: 1.1rem;
+  }
+
+  .stats__value--sm {
+    font-size: 0.92rem;
+  }
+
+  .stats__label {
+    font-size: 0.66rem;
+  }
+
+  /* Küçük ekranda açıklama kutusu haritanın dörtte birini kaplıyordu.
+     Kategori grubunu gizliyoruz — o bilgi zaten işaretçinin simgesinde
+     var; durumlar ise tek satıra iniyor. */
+  .footer__inner {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .footer__logo {
+    height: 28px;
+  }
+
+  .footer__text {
+    font-size: 0.65rem;
+    line-height: 1.4;
+  }
+
+  .home .leaflet-bottom {
+    bottom: 86px;
+  }
+
+  .map-legend {
+    left: var(--space-2);
+    right: var(--space-2);
+    bottom: 108px;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .map-legend__group--categories {
+    display: none;
+  }
+
+  .map-legend__title {
+    margin-bottom: var(--space-1);
+  }
+
+  .map-legend__list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .report-card,
+  .report-card__link,
+  .admin-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .report-card__actions {
+    padding: 0 var(--space-3) var(--space-3);
+    justify-content: flex-end;
+  }
+
+  .report-card__thumb,
+  .admin-card__thumb {
+    width: 100%;
+    height: 150px;
+  }
+
+  .admin-card__control {
+    align-items: stretch;
+  }
+
+  .admin-card__control .input {
+    width: 100%;
+  }
+
+  .detail__body {
+    padding: var(--space-4);
+  }
+
+  .detail__meta-row {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .form-card__actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-card__actions .btn {
+    width: 100%;
+  }
+
+  .timeline {
+    padding: var(--space-4) 0 var(--space-3);
+  }
+
+  .timeline__label {
+    font-size: var(--text-xs);
+  }
+
+  .auth-card {
+    padding: var(--space-5) var(--space-4);
+  }
+}
+
+/* ---------- azaltılmış hareket ----------
+   Kullanıcı sistem düzeyinde hareket azaltma istediyse tüm giriş
+   animasyonlarını kapat, geçişleri neredeyse anlık yap. */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .spinner {
+    animation-duration: 1.2s !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  .report-card:hover,
+  .admin-card:hover,
+  .navbar__cta:hover {
+    transform: none;
+  }
+}
