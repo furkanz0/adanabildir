@@ -291,12 +291,39 @@ npm run deploy   # derleyip Firebase Hosting'e yayınla
 > `running scripts is disabled on this system` hatası verirse:
 > `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`
 
-## Yayına alma (Firebase Hosting)
+## Yayına alma
 
-Firebase Hosting ücretsiz Spark planına dahildir ve HTTPS sertifikasını
-kendisi sağlar. HTTPS önemli: `navigator.geolocation` yalnızca güvenli
+Canlı sürüm **Vercel**'de: https://adanabildir.vercel.app
+Depoda Firebase Hosting yapılandırması da hazır duruyor (ikisi de ücretsiz
+planla çalışıyor).
+
+HTTPS her iki durumda da önemli: `navigator.geolocation` yalnızca güvenli
 bağlamlarda çalışır, yani konum özelliği ancak yayına alındıktan sonra gerçek
 bir telefonda test edilebilir.
+
+### Vercel
+
+GitHub deposu bağlıysa her `git push` otomatik yeni sürüm yayınlıyor. Ortam
+değişkenleri Vercel panelinden (Project → Settings → Environment Variables)
+tanımlanıyor; `.env` dosyası depoya girmediği için oradan ayrıca girilmeli.
+
+[`vercel.json`](vercel.json) içindeki tek kural kritik:
+
+```json
+{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
+```
+
+Bu olmadan yalnızca `/` çalışıyor; `/login`, `/admin` veya `/report/abc123`
+adreslerini doğrudan açmak ya da o sayfalarda yenilemek **404** veriyor —
+ölçüldü. Sunucuda o isimde bir dosya yok, yönlendirmeyi React Router yapıyor.
+Yönlendirme dosya sisteminden **sonra** uygulandığı için `/assets/**` altındaki
+gerçek dosyalar bu kuraldan etkilenmiyor.
+
+Vercel `index.html`'i kendiliğinden `max-age=0, must-revalidate` ile sunuyor ve
+içerik özeti taşıyan varlık dosyalarını uzun süre önbellekliyor; ek başlık
+yapılandırması gerekmiyor.
+
+### Firebase Hosting (alternatif)
 
 Yapılandırma dosyaları repoda hazır (`firebase.json`, `.firebaserc`), yani
 `firebase init` çalıştırmaya gerek yok.
@@ -824,11 +851,10 @@ mobil görünüm (açık menü).
 
 ## Canlı demo
 
-[Deploy edildikten sonra link buraya eklenecek]
+**https://adanabildir.vercel.app**
 
-```bash
-npm run deploy   # vite build + firebase deploy --only hosting
-```
+Konum özelliği yalnızca HTTPS altında çalışır (`navigator.geolocation` güvenli
+bağlam ister), yani gerçek bir telefonda test etmek için canlı sürüm gerekiyor.
 
 ---
 
