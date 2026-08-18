@@ -860,8 +860,8 @@ bağlam ister), yani gerçek bir telefonda test etmek için canlı sürüm gerek
 
 ## Katkıda bulunan
 
-**[Ad Soyad]** — [GitHub / LinkedIn bağlantısı]
+**Furkan Zorlu** — [GitHub / LinkedIn bağlantısı]
 
-Adana Büyükşehir Belediyesi **[birim adı]** stajı kapsamında geliştirilmiştir.
+Adana Büyükşehir Belediyesi **Bilgi İşlem Dairesi Başkanlığı Yazılım Birimi** stajı kapsamında geliştirilmiştir.
 
 Bu bir demo/portföy projesidir, resmî bir belediye hizmeti değildir.
