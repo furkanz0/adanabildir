@@ -841,11 +841,34 @@ geohash tabanlı bir sorguya geçmek gerekir.
 
 ## Ekran görüntüleri
 
-[Ekran görüntüleri buraya eklenecek]
+### Ana sayfa / harita
 
-Önerilen kareler: harita + süzgeç çubuğu, bildirim formu (yapay zeka tahmini +
-hasar yoğunluğu birlikte), detay sayfası (mavi analiz çerçevesi), admin paneli,
-mobil görünüm (açık menü).
+Bütün bildirimler tek haritada; üstte ilçe, durum, kategori ve tarih süzgeçleri,
+sağda canlı istatistik şeridi. Pin rengi durumu, simgesi kategoriyi anlatıyor.
+
+![Harita üzerinde bildirimler, dört süzgeç ve canlı istatistik şeridi](screenshots/anasayfa.jpg)
+
+### Bildirim formu — yapay zeka tahmini ve hasar yoğunluğu
+
+Fotoğraf seçilir seçilmez iki analiz birlikte çalışıyor: TensorFlow.js kategoriyi
+tahmin ediyor, OpenCV.js hasar yoğunluğunu ölçüp analiz edilen bölgeyi mavi
+çerçeveyle gösteriyor.
+
+![Bildirim formunda yapay zeka kategori tahmini ve OpenCV.js hasar yoğunluğu ölçümü](screenshots/bildirim-formu.png)
+
+### Bildirim detay sayfası
+
+Fotoğraf üzerinde ölçüm çerçevesi, durum zaman çizelgesi, ilçe ve koordinat
+bilgileri, konumu gösteren küçük harita.
+
+![Bildirim detay sayfası: analiz çerçevesi, durum zaman çizelgesi ve konum haritası](screenshots/detay-sayfasi.png)
+
+### Admin paneli
+
+İlçe başına bildirim sayıları, üç süzgeç, her kayıt için durum değiştirme,
+belediye açıklaması ekleme ve silme.
+
+![Admin paneli: ilçe istatistikleri, süzgeçler ve durum yönetimi](screenshots/admin-panel.png)
 
 ---
 
