@@ -883,7 +883,7 @@ bağlam ister), yani gerçek bir telefonda test etmek için canlı sürüm gerek
 
 ## Katkıda bulunan
 
-**Furkan Zorlu** — [GitHub / LinkedIn bağlantısı]
+**Furkan Zorlu** — www.linkedin.com/in/furkan-zorlu
 
 Adana Büyükşehir Belediyesi **Bilgi İşlem Dairesi Başkanlığı Yazılım Birimi** stajı kapsamında geliştirilmiştir.
 
